@@ -22,18 +22,7 @@ if host_machine.system() == 'linux' and meson.get_compiler('cpp').has_argument('
   dpp_sub_opts.append_link_args('-pthread')
 endif
 
-# unsafely assuming only 'release' and 'debug' are used, let the world burn
-if get_option('buildtype') == 'release'
-  dpp_sub_opts.add_cmake_defines( { 'CMAKE_BUILD_TYPE': 'RELEASE' } )
-else
-  dpp_sub_opts.add_cmake_defines( { 'CMAKE_BUILD_TYPE': 'DEBUG' } )
-endif
-
-cmd = run_command('sh', '-c', 'echo $OPUS_INCLUDE_DIRS')
-OPUS_INCLUDE_DIRS = cmd.stdout().strip()
-
-cmd = run_command('sh', '-c', 'echo $OPUS_LIBRARIES')
-OPUS_LIBRARIES = cmd.stdout().strip()
+dpp_sub_opts.add_cmake_defines( { 'CMAKE_BUILD_TYPE': get_option('buildtype').to_upper() } )
 
 dpp_sub = cmake.subproject('dpp', options: dpp_sub_opts, required: true)
 
@@ -50,7 +39,7 @@ local_deps = [
   ),
 ]
 
-compilation_options = [
+haumea_compilation_options = [
   'cpp_std=c++20'
 ]
 
@@ -58,21 +47,13 @@ include_dirs = [
   include_directories('include')
 ]
 
-sources = files(
-)
+sources = files()
 
 haumea_dep = declare_dependency(
-  sources: [sources],
+  sources: sources,
   dependencies: local_deps,
   include_directories: include_dirs,
 )
 
-executable(
-  'haumea',
-  files('src/main.cpp'),
-  dependencies: haumea_dep,
-  override_options: compilation_options,
-  install: true
-)
-
+subdir('src')
 subdir('test')
