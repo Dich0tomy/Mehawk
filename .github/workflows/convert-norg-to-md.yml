@@ -1,6 +1,9 @@
 name: Norg to markdown conversion
 
-on: push
+on:
+  push:
+    branches:
+      - trunk
 
 jobs:
   convert-norg-to-md:
