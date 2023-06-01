@@ -25,9 +25,8 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git config advice.addIgnoredFile false
           if [[ ! -z $(git status -s) ]]; then
-            find . -name "*.md" -not -path "./subprojects/*" -not -path "./.tests/*" | git add
+            find . -name "*.md" -not -path "./subprojects/*" -not -path "./.tests/*" | xargs git add
             git commit -m "chore(docs): generate markdown from norg files"
           fi
 
