@@ -26,7 +26,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           if [[ ! -z $(git status -s) ]]; then
-            find . -name "*.md" | xargs git add
+            find . -name "*.md" -not -path "./subprojects/*" -not -path "./.tests/*"
             git commit -m "chore(docs): generate markdown from norg files"
           fi
 
