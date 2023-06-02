@@ -32,7 +32,7 @@ local_deps = [
 
   dpp_sub.dependency('dpp'),
 
-  dependency('fmt', required: true),
+  dependency('spdlog', required: true),
   dependency(
     'gtkmm-4.0',
     required: true,

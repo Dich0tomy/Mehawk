@@ -1,6 +1,5 @@
-#include <fmt/format.h>
+#include <spdlog/spdlog.h>
 
 auto main() -> int {
-  fmt::print("Hello, world!\n");
-  // test
+  spdlog::info("Hello, World!");
 }
