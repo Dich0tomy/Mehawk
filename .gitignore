@@ -3,6 +3,7 @@
 !include/
 !src/
 !docs
+!test
 
 !subprojects/
 
