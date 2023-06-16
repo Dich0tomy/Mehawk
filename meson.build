@@ -45,7 +45,9 @@ include_dirs = [
   include_directories('include')
 ]
 
-sources = files()
+sources = files(
+  'src/env.cpp'
+)
 
 haumea_dep = declare_dependency(
   sources: sources,
