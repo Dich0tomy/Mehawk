@@ -20,8 +20,12 @@ cmake = import('cmake')
 build_type_opts = cmake.subproject_options()
 build_type_opts.add_cmake_defines( { 'CMAKE_BUILD_TYPE': get_option('buildtype').to_upper() } )
 
+libassert_opts = cmake.subproject_options()
+libassert_opts.add_cmake_defines( { 'BUILD_SHARED_LIBS': 'ON' } )
+libassert_opts.add_cmake_defines( { 'CMAKE_BUILD_TYPE': get_option('buildtype').to_upper() } )
+
 dpp_sub = cmake.subproject('dpp', options: build_type_opts, required: true)
-libassert_sub = cmake.subproject('libassert', options: build_type_opts, required: true)
+libassert_sub = cmake.subproject('libassert', options: libassert_opts, required: true)
 
 local_deps = [
   dependency('threads', required: true),
