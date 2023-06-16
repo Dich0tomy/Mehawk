@@ -29,27 +29,29 @@
           };
 
         devShells.default = with pkgs;
-          mkShell.override {
-            stdenv = lowPrio llvmPackages_16.stdenv;
-          } {
-            buildInputs = [
-              clang-tools_16
-              cmake
-              pkg-config
+            mkShell.override {
+              stdenv = lowPrio llvmPackages_15.stdenv;
+            } {
+              buildInputs = [
+                llvmPackages_15.bintools-unwrapped
+                clang-tools_15
+                cmake
+                pkg-config
 
-              just
-              ninja
-              meson
+                just
+                ninja
+                meson
 
-              openssl
-              python311
-              gtkmm4
-            ];
+                openssl
+                python311
+                gtkmm4
+              ];
 
-            env = {
-              CLANGD_PATH = "${pkgs.clang-tools_16}/bin/clangd";
+              env = {
+                CLANGD_PATH = "${pkgs.clang-tools_15}/bin/clangd";
+                ASAN_SYMBOLIZER_PATH = "${pkgs.llvmPackages_15.bintools-unwrapped}/bin/llvm-symbolizer";
+              };
             };
-          };
       };
     };
 }
