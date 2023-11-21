@@ -102,4 +102,4 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: Auto
 TabWidth: 2
-UseTab: Never
+UseTab: Always
