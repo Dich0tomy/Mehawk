@@ -28,12 +28,6 @@
 
           mehawkBuildInputs =
             [
-              pkgs.spdlog
-              pkgs.fmt
-              pkgs.magic-enum
-              pkgs.tomlplusplus
-              pkgs.catch2_3
-
               pkgs.lld
               pkgs.cmake
               pkgs.cmake
@@ -43,8 +37,7 @@
               pkgs.ninja
               pkgs.meson
               pkgs.git
-            ]
-            ++ dependencies;
+            ];
         in {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
@@ -72,34 +65,39 @@
               && baseNameOf path != "build_release")
             ./.;
 
-            buildInputs = mehawkBuildInputs;
+            buildInputs = mehawkBuildInputs ++ [
+            	pkgs.tomlplusplus
+            	pkgs.fmt
+							pkgs.spdlog
+							pkgs.magic-enum
+						] ++ dependencies;
 
-            configurePhase = ''
-              just sr
-            '';
+						configurePhase = ''
+							just sr
+							'';
 
-            buildPhase = ''
-              just cr
-            '';
+						buildPhase = ''
+							just cr
+							'';
 
-            installPhase = ''
-              mkdir -p $out/bin
-              cp build_release/src/mehawk $out/bin
-            '';
-          };
+						installPhase = ''
+							mkdir -p $out/bin
+							cp build_release/src/mehawk $out/bin
+							'';
+					};
 
-          devShells.default = pkgs.mkShell.override {stdenv = pkgs.clang15Stdenv;} {
-            hardeningDisable = ["all"];
+					devShells.default = pkgs.mkShell.override {stdenv = pkgs.clang15Stdenv;} {
+						hardeningDisable = [ "all" ];
 
-            buildInputs = mehawkBuildInputs ++ [pkgs.gf];
+						buildInputs = mehawkBuildInputs ++ [pkgs.gf];
 
-            env = {
-              CLANGD_PATH = "${pkgs.clang-tools_15}/bin/clangd";
-              ASAN_SYMBOLIZER_PATH = "${pkgs.llvmPackages_15.bintools-unwrapped}/bin/llvm-symbolizer";
-              CXX_LD = "lld";
-            };
-          };
-        };
-      }
-    );
+						env = {
+							CLANGD_PATH = "${pkgs.clang-tools_15}/bin/clangd";
+							ASAN_SYMBOLIZER_PATH = "${pkgs.llvmPackages_15.bintools-unwrapped}/bin/llvm-symbolizer";
+							CXX_LD = "lld";
+						};
+					};
+				};
+			}
+	);
 }

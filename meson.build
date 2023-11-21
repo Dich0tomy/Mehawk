@@ -38,17 +38,26 @@ if not expected.found()
   expected = expected_sub.dependency('expected')
 endif
 
+fmt = dependency('fmt', method: 'auto', required: false)
+if not fmt.found()
+  fmt_sub = cmake.subproject('fmt', options: build_type_opts, required: true)
+  fmt = fmt_sub.dependency('fmt')
+endif
+
+# Man this whole ecosystem is a wreck. Meson should find the wrap, nix will build with the prebuilt version
+tomlplusplus = dependency('tomlplusplus')
+
 local_deps = [
   dependency('threads', required: true),
 
   libassert,
   optional,
   expected,
+  tomlplusplus,
+  fmt,
 
-  dependency('tomlplusplus', required: true),
-  dependency('magic_enum', required: true),
-  dependency('fmt', required: true),
-  dependency('spdlog', required: true),
+  dependency('magic_enum'),
+  dependency('spdlog'),
 ]
 
 mehawk_compilation_options = [
