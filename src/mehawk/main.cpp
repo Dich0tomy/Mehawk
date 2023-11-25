@@ -2,6 +2,6 @@
 
 auto main(int argc, char** argv) -> int
 {
-  auto app = App();
-  return app.run(argc, argv);
+	auto app = App();
+	return app.run(argc, argv);
 }

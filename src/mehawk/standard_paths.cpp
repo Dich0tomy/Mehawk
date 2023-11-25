@@ -24,76 +24,78 @@ using HomeDirResult = tl::optional<PathType>;
 
 auto safe_getenv(char const* name) -> HomeDirResult
 {
-  auto* const result = std::getenv(name);
+	auto* const result = std::getenv(name);
 
-  if(result) return { result };
+	if(result) return { result };
 
-  return {};
+	return {};
 }
 
 #ifdef OS_LINUX
 
-  #include <unistd.h>
-  #include <pwd.h>
+	#include <unistd.h>
+	#include <pwd.h>
 
 // NOTE: This function is not reentrant due to using getpwnam inside (which means it cannot be called in a signal and it's not thread safe)
 auto get_home() -> PathType
 {
-  static auto const home = safe_getenv("HOME").or_else([]() -> HomeDirResult {
-    auto const uid = getuid();
-    auto* const passwd = getpwuid(uid);
+	static auto const home = safe_getenv("HOME").or_else([]() -> HomeDirResult {
+		auto const uid = getuid();
+		auto* const passwd = getpwuid(uid);
 
-    if(not passwd or not passwd->pw_dir) return {};
+		if(not passwd or not passwd->pw_dir) return {};
 
-    return passwd->pw_dir;
-  });
+		return passwd->pw_dir;
+	});
 
-  return home
-    .or_else([]() { throw std::runtime_error("The $HOME variable couldn't be determined."); })
-    .value();
+	return home
+		.or_else([]() { throw std::runtime_error("The $HOME variable couldn't be determined."); })
+		.value();
 }
 
 auto get_linux_standard_paths() -> StandardPaths::GetResult
 {
-  namespace fs = std::filesystem;
-  using enum StandardPaths::RetrievalError;
+	namespace fs = std::filesystem;
 
-  static auto const home = get_home();
+	static auto const home = get_home();
 
-  static auto const config_path = safe_getenv("XDG_CONFIG_HOME").value_or(fs::path(home) / ".config");
-  static auto const data_path = safe_getenv("XDG_DATA_HOME").value_or(fs::path(home) / ".local/share");
-  static auto const cache_path = safe_getenv("XDG_CACHE_HOME").value_or(fs::path(home) / ".cache");
+	static auto const config_path = safe_getenv("XDG_CONFIG_HOME").value_or(fs::path(home) / ".config");
+	static auto const data_path = safe_getenv("XDG_DATA_HOME").value_or(fs::path(home) / ".local/share");
+	static auto const cache_path = safe_getenv("XDG_CACHE_HOME").value_or(fs::path(home) / ".cache");
 
-  return StandardPaths::Paths {
-    .config = config_path,
-    .data = data_path,
-    .cache = cache_path,
-  };
+	static auto const paths = StandardPaths::Paths {
+		.config = config_path,
+		.data = data_path,
+		.cache = cache_path,
+	};
+
+	return paths;
 }
 
 #elif defined(OS_MAC)
 auto get_mac_standard_paths() -> hm::StandardPaths::GetResult
 {
-  namespace fs = std::filesystem;
-  using enum hm::StandardPaths::RetrievalError;
+	namespace fs = std::filesystem;
 
-  static auto const home = get_home();
+	static auto const home = get_home();
 
-  static auto const config_path = fs::path(home) / "Library/Preferences";
-  static auto const data_path = fs::path(home) / "Library/Application Support";
-  static auto const cache_path = fs::path(home) / "Library/Caches";
+	static auto const config_path = fs::path(home) / "Library/Preferences";
+	static auto const data_path = fs::path(home) / "Library/Application Support";
+	static auto const cache_path = fs::path(home) / "Library/Caches";
 
-  return hm::StandardPaths::Paths {
-    .config = config_path,
-    .data = data_path,
-    .cache = cache_path,
-  };
+	static auto const paths = StandardPaths::Paths {
+		.config = config_path,
+		.data = data_path,
+		.cache = cache_path,
+	};
+
+	return paths;
 }
 
 #elif defined(OS_WINDOWS)
 auto get_windows_standard_paths() -> hm::StandardPaths::GetResult
 {
-  unimplemented();
+	unimplemented();
 }
 #endif
 
@@ -101,26 +103,26 @@ auto get_windows_standard_paths() -> hm::StandardPaths::GetResult
 
 auto StandardPaths::get(IncludeAppFolderTag const tag) -> GetResult
 {
-  auto paths =
+	auto paths =
 #ifdef OS_LINUX
-    get_linux_standard_paths();
+		get_linux_standard_paths();
 #elif defined(OS_MAC)
-    get_mac_standard_paths();
+		get_mac_standard_paths();
 #else
-    get_windows_standard_paths();
+		get_windows_standard_paths();
 #endif
 
-  if(tag != IncludeAppFolder) {
-    return paths;
-  }
+	if(tag != IncludeAppFolder) {
+		return paths;
+	}
 
-  return paths.map([](Paths const& paths) {
-    auto const app_folder = static_config::app_name() + "/";
+	return paths.map([](Paths const& paths) {
+		auto const app_folder = static_config::app_name() + "/";
 
-    return StandardPaths::Paths {
-      .config = paths.config / app_folder,
-      .data = paths.data / app_folder,
-      .cache = paths.cache / app_folder
-    };
-  });
+		return StandardPaths::Paths {
+			.config = paths.config / app_folder,
+			.data = paths.data / app_folder,
+			.cache = paths.cache / app_folder
+		};
+	});
 }

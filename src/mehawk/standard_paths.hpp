@@ -11,31 +11,31 @@
 class StandardPaths
 {
 private:
-  enum class IncludeAppFolderTag
-  {
-    Set,
-    Unset
-  };
+	enum class IncludeAppFolderTag
+	{
+		Set,
+		Unset
+	};
 
 public:
-  enum class RetrievalError
-  {
+	enum class RetrievalError
+	{
 #ifndef OS_WINDOWS
-    NoHomeVariable,
+		NoHomeVariable,
 #endif
-  };
+	};
 
-  struct Paths
-  {
-    std::filesystem::path config;
-    std::filesystem::path data;
-    std::filesystem::path cache;
-  };
+	struct Paths
+	{
+		std::filesystem::path config;
+		std::filesystem::path data;
+		std::filesystem::path cache;
+	};
 
-  using GetResult = tl::expected<Paths, RetrievalError>;
+	using GetResult = tl::expected<Paths, RetrievalError>;
 
-  inline static auto constexpr IncludeAppFolder = IncludeAppFolderTag::Set;
-  /**
+	inline static auto constexpr IncludeAppFolder = IncludeAppFolderTag::Set;
+	/**
    * @brief Returns a standard user-local path for host os
    *
    * @description
@@ -54,5 +54,5 @@ public:
    *  - Mac: $HOME/Library/Cache
    *  - Windows: %LOCALAPPDATA%
    */
-  static auto get(IncludeAppFolderTag tag = IncludeAppFolderTag::Unset) -> GetResult;
+	static auto get(IncludeAppFolderTag tag = IncludeAppFolderTag::Unset) -> GetResult;
 };

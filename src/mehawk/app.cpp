@@ -44,7 +44,11 @@ auto setup_logs(auto const& log_path, ShouldLogToFile should_log_to_file) -> voi
 		}
 
 		spdlog::set_default_logger(
-			std::make_unique<spdlog::logger>("console_and_daily", sinks.begin(), sinks.end())
+			std::make_unique<spdlog::logger>(
+				"console_and_daily",
+				std::make_move_iterator(sinks.begin()),
+				std::make_move_iterator(sinks.end())
+			)
 		);
 	} catch(spdlog::spdlog_ex const& ex) {
 		SPDLOG_ERROR(R"X(Couldn't retrieve user log path. "{}")X", ex.what());
@@ -111,6 +115,7 @@ auto read_config(std::filesystem::path const& config_path, AppConfig defaults)
 	namespace fs = std::filesystem;
 
 	if(not fs::exists(config_path)) {
+		SPDLOG_INFO("File doesn't exist. Creating default config.");
 		return create_config(config_path, defaults);
 	}
 
