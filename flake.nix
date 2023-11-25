@@ -89,7 +89,7 @@
 					devShells.default = pkgs.mkShell.override {stdenv = pkgs.clang15Stdenv;} {
 						hardeningDisable = [ "all" ];
 
-						buildInputs = mehawkBuildInputs ++ [pkgs.gf];
+						buildInputs = mehawkBuildInputs ++ [ pkgs.gdb pkgs.seer ];
 
 						env = {
 							CLANGD_PATH = "${pkgs.clang-tools_15}/bin/clangd";
