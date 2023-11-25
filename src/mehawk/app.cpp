@@ -110,16 +110,30 @@ auto read_existing_config(std::filesystem::path const& config_path, AppConfig de
 	return defaults;
 }
 
-auto read_config(std::filesystem::path const& config_path, AppConfig defaults)
+auto read_config(StandardPaths::Paths const& standard_paths, AppConfig defaults)
 {
 	namespace fs = std::filesystem;
 
-	if(not fs::exists(config_path)) {
-		SPDLOG_INFO("File doesn't exist. Creating default config.");
-		return create_config(config_path, defaults);
-	}
+	auto const config_path = standard_paths.config / static_config::config_filename();
 
-	return read_existing_config(config_path, defaults);
+	SPDLOG_INFO(R"(Reading config file from "{}".)", config_path.string());
+
+	auto config = std::invoke([&config_path, defaults = std::move(defaults)] {
+		if(not fs::exists(config_path)) {
+			SPDLOG_INFO("File doesn't exist. Creating default config.");
+			return create_config(config_path, defaults);
+		}
+
+		return read_existing_config(config_path, defaults);
+	});
+
+	auto const log_filepath = standard_paths.data / static_config::app_name();
+	auto const log_to_file = config.log_to_file ? ShouldLogToFile::Yes : ShouldLogToFile::No;
+	setup_logs(log_filepath, log_to_file);
+
+	SPDLOG_INFO("Logs set up [{}].", log_to_file);
+
+	return config;
 }
 
 } // namespace
@@ -131,22 +145,15 @@ auto App::run(int argc, char** argv) -> int
 	auto const standard_paths = StandardPaths::get(StandardPaths::IncludeAppFolder);
 	if(not standard_paths) {
 		SPDLOG_ERROR(R"(Cannot read standard paths! "{}".)", magic_enum::enum_name(standard_paths.error()));
-	} else {
-		auto const config_path = standard_paths.value().config / static_config::config_filename();
-
-		SPDLOG_INFO(R"(Reading config file from "{}".)", config_path.string());
-
-		auto config = read_config(
-			config_path,
-			AppConfig { .log_to_file = true }
-		);
-
-		auto const log_filepath = standard_paths.value().data / static_config::app_name();
-		auto const log_to_file = config.log_to_file ? ShouldLogToFile::Yes : ShouldLogToFile::No;
-		setup_logs(log_filepath, log_to_file);
-
-		SPDLOG_INFO("Logs set up [{}].", log_to_file);
+		return -1;
 	}
+
+	auto default_config = AppConfig {
+		.log_to_file = true
+	};
+
+	auto config = read_config(standard_paths.value(), std::move(default_config));
+
 
 	return 0;
 }
