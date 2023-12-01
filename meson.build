@@ -13,7 +13,13 @@ endif
 
 if(meson.get_compiler('cpp').get_id() == 'clang')
   add_project_arguments(['-stdlib=libc++'], language: 'cpp')
+  add_project_arguments('-D_LIBCPP_DEBUG', language: 'cpp')
 endif
+
+if(meson.get_compiler('cpp').get_id() == 'gcc')
+  add_project_arguments('-DGLIBCXX_DEBUG', language: 'cpp')
+endif
+
 
 cmake = import('cmake')
 
@@ -44,8 +50,11 @@ if not fmt.found()
   fmt = fmt_sub.dependency('fmt')
 endif
 
-# Man this whole ecosystem is a wreck. Meson should find the wrap, nix will build with the prebuilt version
-tomlplusplus = dependency('tomlplusplus')
+toml11 = dependency('toml11', method: 'auto', required: false)
+if not toml11.found()
+  toml11_sub = cmake.subproject('toml11', options: build_type_opts, required: true)
+  toml11 = toml11_sub.dependency('toml11')
+endif
 
 local_deps = [
   dependency('threads', required: true),
@@ -53,7 +62,7 @@ local_deps = [
   libassert,
   optional,
   expected,
-  tomlplusplus,
+  toml11,
   fmt,
 
   dependency('magic_enum'),
@@ -70,7 +79,6 @@ include_dirs = [
 
 sources = files(
   'src/mehawk/standard_paths.cpp',
-  'src/mehawk/app_config.cpp',
   'src/mehawk/env.cpp',
   'src/mehawk/app.cpp'
 )
