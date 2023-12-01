@@ -9,18 +9,18 @@
 [[noreturn]] inline auto unreachable() noexcept -> void
 {
 #ifdef __GNUC__ // GCC, Clang, ICC
-  __builtin_unreachable();
+	__builtin_unreachable();
 #elif defned(_MSC_VER)
-  __assume(false);
+	__assume(false);
 #endif
 }
 
 /// Stops the application, and signals that a certain path is not implemented.
 [[noreturn]] inline auto unimplemented() noexcept -> void
 {
-  // TODO: figure out how to instruct clang-tidy to nolint all of these macros
-  ASSERT(false, "Unimplemented."); // NOLINT
-  unreachable();
+	// TODO: figure out how to instruct clang-tidy to nolint all of these macros
+	ASSERT(false, "Unimplemented."); // NOLINT
+	unreachable();
 }
 
 namespace impl
@@ -30,51 +30,27 @@ template<typename Type, auto Distinct>
 class DistinctType
 {
 public:
-  constexpr explicit DistinctType() = default;
+	constexpr explicit DistinctType() = default;
 
-  template<typename T>
-    requires(not std::same_as<T, DistinctType>)
-  constexpr explicit DistinctType(T&& data) // NOLINT
-    : data(static_cast<T&&>(data))
-  {}
+	template<typename T>
+		requires(not std::same_as<T, DistinctType>)
+	constexpr explicit DistinctType(T&& data) // NOLINT
+		: data(static_cast<T&&>(data))
+	{}
 
-  constexpr explicit operator decltype(auto)() & noexcept { return data; }
+	constexpr explicit operator decltype(auto)() & noexcept { return data; }
 
-  constexpr explicit operator decltype(auto)() && noexcept { return std::move(data); }
+	constexpr explicit operator decltype(auto)() && noexcept { return std::move(data); }
 
-  constexpr explicit operator decltype(auto)() const& noexcept { return data; }
+	constexpr explicit operator decltype(auto)() const& noexcept { return data; }
 
-  constexpr explicit operator decltype(auto)() const&& noexcept { return std::move(data); }
+	constexpr explicit operator decltype(auto)() const&& noexcept { return std::move(data); }
 
 private:
-  Type data;
+	Type data;
 };
 
 } // namespace impl
-
-template<typename Type>
-class MustInit
-{
-public:
-  MustInit() = delete;
-
-  template<typename T>
-    requires(not std::same_as<T, MustInit>)
-  constexpr MustInit(T&& data) // NOLINT
-    : data(static_cast<T&&>(data))
-  {}
-
-  constexpr operator decltype(auto)() & noexcept { return data; }
-
-  constexpr operator decltype(auto)() && noexcept { return std::move(data); }
-
-  constexpr operator decltype(auto)() const& noexcept { return data; }
-
-  constexpr operator decltype(auto)() const&& noexcept { return std::move(data); }
-
-private:
-  Type data;
-};
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define MH_TRAP(...) (ASSERT(false, "This should never happen.\n" #__VA_ARGS__), unreachable())
