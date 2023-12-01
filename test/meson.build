@@ -1,14 +1,12 @@
-catch2 = dependency('catch2', method: 'auto', required: false)
-# if not expected.found()
-#   catch2_sub = cmake.subproject('', options: build_type_opts, required: true)
-#   catch2 = catch2_sub.dependency('catch2-with-main')
-# endif
+catch2 = dependency('catch2-with-main', required: true)
 
 local_deps = [
   catch2
 ]
 
-test_sources = files()
+test_sources = files(
+  'toml_config.cpp'
+)
 
 test_exe = executable(
   'mehawk_test',
@@ -18,7 +16,11 @@ test_exe = executable(
   override_options: mehawk_compilation_options,
 )
 
-tests = []
+tests = [
+  'Empty config returns defaults',
+  'Config is read properly',
+  'Config is written properly'
+]
 
 foreach test : tests
   test(test, test_exe)
