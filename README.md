@@ -1,3 +1,5 @@
+**NOTE: Look at [Blanket](https://github.com/Dich0otomy/Blanket) instead ;) \[May still be private.]**
+
 # Mehawk
 
 Mehawk is a general overlay for different services (discord, matrix and such).
